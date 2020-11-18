@@ -20,6 +20,8 @@ import (
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/rs/zerolog/log"
 )
 
 // Graph API debug mode values.
@@ -446,13 +448,11 @@ func (session *Session) prepareParams(params Params) {
 
 func (session *Session) sendGetRequest(uri string, res interface{}) (*http.Response, error) {
 	request, err := http.NewRequest("GET", uri, nil)
-
 	if err != nil {
 		return nil, err
 	}
 
 	response, data, err := session.sendRequest(request)
-
 	if err != nil {
 		return response, err
 	}
@@ -464,19 +464,19 @@ func (session *Session) sendGetRequest(uri string, res interface{}) (*http.Respo
 func (session *Session) sendPostRequest(uri string, params Params, res interface{}) (*http.Response, error) {
 	buf := &bytes.Buffer{}
 	mime, err := params.Encode(buf)
-
 	if err != nil {
 		return nil, fmt.Errorf("facebook: cannot encode POST params; %v", err)
 	}
 
 	request, err := http.NewRequest("POST", uri, buf)
-
 	if err != nil {
 		return nil, err
 	}
 
 	request.Header.Set("Content-Type", mime)
 	response, data, err := session.sendRequest(request)
+
+	log.Info().Interface("response", response).Str("data", string(data)).AnErr(err).Msg("sendRequest")
 
 	if err != nil {
 		return response, err
@@ -490,20 +490,17 @@ func (session *Session) sendOauthRequest(uri string, params Params) (Result, err
 	urlStr := session.getURL("graph", uri, nil)
 	buf := &bytes.Buffer{}
 	mime, err := params.Encode(buf)
-
 	if err != nil {
 		return nil, fmt.Errorf("facebook: cannot encode POST params; %v", err)
 	}
 
 	request, err := http.NewRequest("POST", urlStr, buf)
-
 	if err != nil {
 		return nil, err
 	}
 
 	request.Header.Set("Content-Type", mime)
 	_, data, err := session.sendRequest(request)
-
 	if err != nil {
 		return nil, err
 	}
@@ -515,7 +512,6 @@ func (session *Session) sendOauthRequest(uri string, params Params) (Result, err
 	// facebook may return a query string.
 	if 'a' <= data[0] && data[0] <= 'z' {
 		query, err := url.ParseQuery(string(data))
-
 		if err != nil {
 			return nil, err
 		}
