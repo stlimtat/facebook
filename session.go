@@ -476,7 +476,7 @@ func (session *Session) sendPostRequest(uri string, params Params, res interface
 	request.Header.Set("Content-Type", mime)
 	response, data, err := session.sendRequest(request)
 
-	log.Info().Interface("response", response).Str("data", string(data)).AnErr(err).Msg("sendRequest")
+	log.Info().Interface("response", response).Str("data", string(data)).AnErr("err", err).Msg("sendRequest")
 
 	if err != nil {
 		return response, err
