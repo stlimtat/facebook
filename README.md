@@ -1,11 +1,11 @@
 # A Facebook Graph API SDK In Golang
 
 [![Build Status](https://travis-ci.org/huandu/facebook.svg?branch=master)](https://travis-ci.org/huandu/facebook)
-[![GoDoc](https://godoc.org/github.com/huandu/facebook?status.svg)](https://godoc.org/github.com/huandu/facebook)
+[![GoDoc](https://godoc.org/github.com/huandu/facebook?status.svg)](https://pkg.go.dev/github.com/huandu/facebook/v2)
 
 This is a Go package that fully supports the [Facebook Graph API](https://developers.facebook.com/docs/graph-api/) with file upload, batch request and marketing API. It can be used in Google App Engine.
 
-API documentation can be found on [godoc](http://godoc.org/github.com/huandu/facebook).
+API documentation can be found on [godoc](https://pkg.go.dev/github.com/huandu/facebook/v2).
 
 Feel free to create an issue or send me a pull request if you have any "how-to" question or bug or suggestion when using this package. I'll try my best to reply to it.
 
@@ -83,6 +83,13 @@ if err != nil {
     if e, ok := err.(*Error); ok {
         fmt.Printf("facebook error. [message:%v] [type:%v] [code:%v] [subcode:%v] [trace:%v]",
             e.Message, e.Type, e.Code, e.ErrorSubcode, e.TraceID)
+        return
+    }
+
+    // err can be an unmarshal error when Facebook API returns a message which is not JSON.
+    if e, ok := err.(*UnmarshalError); ok {
+        fmt.Printf("facebook error. [message:%v] [err:%v] [payload:%v]",
+            e.Message, e.Err, string(e.Payload))
         return
     }
 
